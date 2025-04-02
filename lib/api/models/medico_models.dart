@@ -1,3 +1,4 @@
+import 'package:health_med_app/api/models/disponibilidade_models.dart';
 import 'package:health_med_app/api/models/especialidade_models.dart';
 
 class MedicoViewModel {
@@ -6,7 +7,8 @@ class MedicoViewModel {
   String email;
   String crm;
   double valorConsulta;
-  EspecialidadeViewModel? especialidade;
+  EspecialidadeViewModel especialidade;
+  List<DisponibilidadeViewModel>? disponibilidade;
 
   MedicoViewModel({
     required this.id,
@@ -15,6 +17,7 @@ class MedicoViewModel {
     required this.crm,
     required this.valorConsulta,
     required this.especialidade,
+    this.disponibilidade,
   });
 
   MedicoViewModel.fromJson(Map<String, dynamic> json)
@@ -23,7 +26,13 @@ class MedicoViewModel {
         email = json['email'] ?? '',
         crm = json['crm'] ?? '',
         valorConsulta = (json['valorConsulta'] as num?)?.toDouble() ?? 0.0,
-        especialidade = json['especialidade'] != null
-            ? EspecialidadeViewModel.fromJson(json['especialidade'])
+        especialidade = EspecialidadeViewModel.fromJson(
+          json['especialidade'],
+        ),
+        disponibilidade = json['disponibilidade'] != null
+            ? (json['disponibilidade'] as List)
+                .map((disponibilidade) =>
+                    DisponibilidadeViewModel.fromJson(disponibilidade))
+                .toList()
             : null;
 }

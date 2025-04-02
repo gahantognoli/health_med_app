@@ -18,34 +18,52 @@ class _ConsultasState extends State<Consultas> {
 
   String? _especialidadeSelecionadaId;
   List<MedicoViewModel>? _medicos;
+  List<EspecialidadeViewModel>? _especialidades;
+  bool _isLoading = true;
+  bool _hasError = false;
+
+  @override
+  void initState() {
+    super.initState();
+    _carregarEspecialidades();
+  }
+
+  Future<void> _carregarEspecialidades() async {
+    try {
+      final especialidades = await _restClient.obterEspecialidades();
+      setState(() {
+        _especialidades = especialidades;
+        _hasError = false;
+        _isLoading = false;
+      });
+    } catch (e) {
+      setState(() {
+        _isLoading = false;
+        _hasError = true;
+      });
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: FutureBuilder(
-        future: _restClient.obterEspecialidades(),
-        builder: (ctx, snapshot) {
-          if (snapshot.connectionState == ConnectionState.waiting) {
-            return const Center(child: CircularProgressIndicator());
-          }
-
-          if (snapshot.hasError) return const Erro();
-
-          return buildPagina(snapshot.data);
-        },
-      ),
+      body: _isLoading
+          ? const Center(child: CircularProgressIndicator())
+          : _hasError
+              ? const Erro()
+              : buildPagina(),
     );
   }
 
-  Padding buildPagina(List<EspecialidadeViewModel>? especialidades) {
+  Padding buildPagina() {
     return Padding(
       padding: const EdgeInsets.all(20),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: [
           buildTitulo(),
-          if (especialidades != null && especialidades.isNotEmpty)
-            buildDropDownMedicos(especialidades),
+          if (_especialidades != null && _especialidades!.isNotEmpty)
+            buildDropDownMedicos(),
           if (_medicos != null && _medicos!.isNotEmpty)
             buildListaMedicos()
           else
@@ -55,7 +73,7 @@ class _ConsultasState extends State<Consultas> {
     );
   }
 
-  Text buildTitulo() {
+  Widget buildTitulo() {
     return const Text(
       'Agendar consulta?',
       style: TextStyle(
@@ -65,40 +83,57 @@ class _ConsultasState extends State<Consultas> {
     );
   }
 
-  Padding buildDropDownMedicos(List<EspecialidadeViewModel> especialidades) {
+  Widget buildDropDownMedicos() {
     return Padding(
       padding: const EdgeInsets.symmetric(vertical: 10),
-      child: DropdownMenu<String>(
-        initialSelection: _especialidadeSelecionadaId ?? "",
-        onSelected: (String? value) {
-          if (value != null) {
-            _restClient.obterMedicos(value).then((medicos) {
-              setState(() {
-                _especialidadeSelecionadaId = value;
-                _medicos = medicos;
-              });
-            });
-          }
-        },
-        width: double.infinity,
-        hintText: 'Selecione uma especialidade',
-        dropdownMenuEntries: [
-          DropdownMenuEntry<String>(
-            value: "",
-            label: "Todas",
-            leadingIcon: Icon(
-              Icons.medical_services,
-              color: Theme.of(context).colorScheme.secondary,
-            ),
-          ),
-          ...especialidades.map(
-            (especialidade) => DropdownMenuEntry<String>(
-              value: especialidade.id,
-              label: especialidade.nome,
-              leadingIcon: Icon(
-                Icons.medical_services,
-                color: Theme.of(context).colorScheme.secondary,
+      child: Column(
+        children: [
+          DropdownMenu<String>(
+            initialSelection: _especialidadeSelecionadaId ?? "",
+            onSelected: (String? value) {
+              if (value != null) {
+                setState(() => _especialidadeSelecionadaId = value);
+              }
+            },
+            width: double.infinity,
+            hintText: 'Selecione uma especialidade',
+            dropdownMenuEntries: [
+              DropdownMenuEntry<String>(
+                value: "",
+                label: "Todos",
+                leadingIcon: Icon(
+                  Icons.medical_services,
+                  color: Theme.of(context).colorScheme.secondary,
+                ),
               ),
+              ..._especialidades!.map(
+                (especialidade) => DropdownMenuEntry<String>(
+                  value: especialidade.id,
+                  label: especialidade.nome,
+                  leadingIcon: Icon(
+                    Icons.medical_services,
+                    color: Theme.of(context).colorScheme.secondary,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 10),
+          SizedBox(
+            width: double.infinity,
+            child: ElevatedButton(
+              onPressed: () {
+                _restClient
+                    .obterMedicos(_especialidadeSelecionadaId ?? "")
+                    .then((medicos) {
+                  setState(() => _medicos = medicos);
+                });
+              },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.tertiary,
+              ),
+              child: const Text('Buscar médicos'),
             ),
           ),
         ],
@@ -106,7 +141,7 @@ class _ConsultasState extends State<Consultas> {
     );
   }
 
-  Expanded buildListaMedicos() {
+  Widget buildListaMedicos() {
     return Expanded(
       child: ListView.builder(
         itemCount: _medicos!.length,
@@ -119,7 +154,7 @@ class _ConsultasState extends State<Consultas> {
             ),
             title: Text(medico.nome),
             subtitle: Text(
-              '${medico.especialidade?.nome} \n'
+              '${medico.especialidade.nome} \n'
               'R\$ ${medico.valorConsulta.toStringAsFixed(2)}\n',
             ),
             trailing: ElevatedButton(
@@ -128,11 +163,15 @@ class _ConsultasState extends State<Consultas> {
                   context,
                   MaterialPageRoute(
                     builder: (context) => AgendarConsulta(
-                      medico: medico.nome,
+                      idMedico: medico.id,
                     ),
                   ),
                 );
               },
+              style: ElevatedButton.styleFrom(
+                backgroundColor: Theme.of(context).colorScheme.primary,
+                foregroundColor: Theme.of(context).colorScheme.tertiary,
+              ),
               child: const Text('Agendar'),
             ),
             titleTextStyle: const TextStyle(

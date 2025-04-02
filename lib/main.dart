@@ -19,8 +19,8 @@ class MyApp extends StatelessWidget {
       title: 'Health Med App',
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(
-          seedColor: Colors.blue,
-          primary: Colors.blue,
+          seedColor: const Color.fromARGB(255, 22, 124, 207),
+          primary: const Color.fromARGB(255, 22, 124, 207),
           secondary: Colors.teal,
           tertiary: Colors.white,
         ),

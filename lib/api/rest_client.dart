@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 import 'package:health_med_app/api/exceptions/problem_details.dart';
+import 'package:health_med_app/api/models/consulta_models.dart';
 import 'package:health_med_app/api/models/especialidade_models.dart';
 import 'package:health_med_app/api/models/medico_models.dart';
 
@@ -29,6 +30,34 @@ class RestClient {
         : (response.data as List)
             .map((medico) => MedicoViewModel.fromJson(medico))
             .toList();
+  }
+
+  Future<MedicoViewModel> obterMedico(String medicoId) async {
+    var response = await _request(
+      '/api/Medico/$medicoId',
+      method: 'GET',
+    );
+    return MedicoViewModel.fromJson(response.data);
+  }
+
+  Future<List<ConsultaViewModel>?> obterConsultasPendentesMedico(String medicoId) async {
+    var response = await _request(
+      '/api/Consulta/ObterConsultasPendentesMedico/$medicoId',
+      method: 'GET',
+    );
+    return (response.data as List).isEmpty
+        ? null
+        : (response.data as List)
+            .map((consulta) => ConsultaViewModel.fromJson(consulta))
+            .toList();
+  }
+
+  Future<void> agendarConsulta(AgendarConsultaInputModel consulta) async {
+    await _request(
+      '/api/Consulta',
+      method: 'POST',
+      data: consulta.toJson(),
+    );
   }
 
   Future<Response> _request(
