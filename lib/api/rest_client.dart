@@ -3,6 +3,7 @@ import 'package:health_med_app/api/exceptions/problem_details.dart';
 import 'package:health_med_app/api/models/consulta_models.dart';
 import 'package:health_med_app/api/models/especialidade_models.dart';
 import 'package:health_med_app/api/models/medico_models.dart';
+import 'package:health_med_app/api/models/paciente_models.dart';
 
 class RestClient {
   final Dio dio;
@@ -52,11 +53,57 @@ class RestClient {
             .toList();
   }
 
+  Future<void> cancelarConsulta(String consultaId, String motivoCancelamento) async {
+    await _request(
+      '/api/Consulta/Cancelar/$consultaId',
+      method: 'PATCH',
+      data: {
+        'justificativaCancelamento': motivoCancelamento,
+      },
+    );
+  }
+
   Future<void> agendarConsulta(AgendarConsultaInputModel consulta) async {
     await _request(
       '/api/Consulta',
       method: 'POST',
       data: consulta.toJson(),
+    );
+  }
+
+  Future<List<ConsultaViewModel>?> obterConsultasPaciente(String pacienteId) async {
+    var response = await _request(
+      '/api/Consulta/ObterConsultasPaciente/$pacienteId',
+      method: 'GET',
+    );
+    return (response.data as List).isEmpty
+        ? null
+        : (response.data as List)
+            .map((consulta) => ConsultaViewModel.fromJson(consulta))
+            .toList();
+  }
+
+  Future<PacienteViewModel> obterPaciente(String pacienteId) async {
+    var response = await _request(
+      '/api/Paciente/$pacienteId',
+      method: 'GET',
+    );
+    return PacienteViewModel.fromJson(response.data);
+  }
+
+  Future<void> atualizarPaciente(
+      String pacienteId, AtualizacaoPacienteInputModel paciente) async {
+    await _request(
+      '/api/Paciente/$pacienteId',
+      method: 'PATCH',
+      data: paciente.toJson(),
+    );
+  }
+
+  Future<void> excluirPaciente(String pacienteId) async {
+    await _request(
+      '/api/Paciente/$pacienteId',
+      method: 'DELETE',
     );
   }
 

@@ -1,25 +1,25 @@
 import 'package:flutter/material.dart';
-import 'package:health_med_app/pages/consultas.dart';
-import 'package:health_med_app/pages/perfil.dart';
+import 'package:health_med_app/pages/buscar_medicos.dart';
+import 'package:health_med_app/pages/meu_perfil.dart';
+import 'package:health_med_app/pages/minhas_consultas.dart';
 
-class Home extends StatefulWidget {
-  const Home({super.key});
+class Index extends StatefulWidget {
+  const Index({super.key});
 
   @override
-  State<Home> createState() => _HomeState();
+  State<Index> createState() => _IndexState();
 }
 
-class _HomeState extends State<Home> {
+class _IndexState extends State<Index> {
   int indiceTela = 0;
   final List<Widget> telas = [
-    const Consultas(),
-    const Perfil(),
+    const BuscarMedicos(),
+    const MinhasConsultas(),
+    const MeuPerfil(),
   ];
 
   void onTabTapped(int index) {
-    setState(() {
-      indiceTela = index;
-    });
+    setState(() => indiceTela = index);
   }
 
   @override
@@ -40,12 +40,16 @@ class _HomeState extends State<Home> {
         onTap: onTabTapped,
         items: const [
           BottomNavigationBarItem(
-            icon: Icon(Icons.home),
-            label: 'Consultas',
+            icon: Icon(Icons.search),
+            label: 'Buscar médicos',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.medical_services),
+            label: 'Minhas consultas',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.person),
-            label: 'Perfil',
+            label: 'Meu perfil',
           ),
         ],
       ),

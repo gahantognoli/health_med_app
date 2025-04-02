@@ -6,14 +6,14 @@ import 'package:health_med_app/locator.dart';
 import 'package:health_med_app/pages/agendar_consulta.dart';
 import 'package:health_med_app/widgets/erro.dart';
 
-class Consultas extends StatefulWidget {
-  const Consultas({super.key});
+class BuscarMedicos extends StatefulWidget {
+  const BuscarMedicos({super.key});
 
   @override
-  State<Consultas> createState() => _ConsultasState();
+  State<BuscarMedicos> createState() => _BuscarMedicosState();
 }
 
-class _ConsultasState extends State<Consultas> {
+class _BuscarMedicosState extends State<BuscarMedicos> {
   final RestClient _restClient = getIt<RestClient>();
 
   String? _especialidadeSelecionadaId;
