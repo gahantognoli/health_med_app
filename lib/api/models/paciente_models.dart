@@ -18,6 +18,29 @@ class PacienteViewModel {
   }
 }
 
+class CadastroPacienteInputModel {
+  String nome;
+  String email;
+  String cpf;
+  String senha;
+
+  CadastroPacienteInputModel({
+    required this.nome,
+    required this.email,
+    required this.cpf,
+    required this.senha,
+  });
+
+  Map<String, dynamic> toJson() {
+    return {
+      'nome': nome,
+      'email': email,
+      'cpf': cpf,
+      'senha': senha,
+    };
+  }
+}
+
 class AtualizacaoPacienteInputModel {
   String nome;
 

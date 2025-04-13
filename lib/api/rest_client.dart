@@ -11,7 +11,7 @@ class RestClient {
   RestClient(this.dio);
 
   Future<List<EspecialidadeViewModel>?> obterEspecialidades() async {
-    var response = await _request('/api/Especialidade', method: 'GET');
+    var response = await _request('/med/Especialidade', method: 'GET');
     return (response.data as List).isEmpty
         ? null
         : (response.data as List)
@@ -21,7 +21,7 @@ class RestClient {
   }
 
   Future<List<MedicoViewModel>?> obterMedicos(String especialidadeId) async {
-    var response = await _request('/api/Consulta/ObterMedicos',
+    var response = await _request('/med/Consulta/ObterMedicos',
         method: 'GET',
         queryParameters: {
           'especialidadeId': especialidadeId,
@@ -35,7 +35,7 @@ class RestClient {
 
   Future<MedicoViewModel> obterMedico(String medicoId) async {
     var response = await _request(
-      '/api/Medico/$medicoId',
+      '/med/Medico/$medicoId',
       method: 'GET',
     );
     return MedicoViewModel.fromJson(response.data);
@@ -43,7 +43,7 @@ class RestClient {
 
   Future<List<ConsultaViewModel>?> obterConsultasPendentesMedico(String medicoId) async {
     var response = await _request(
-      '/api/Consulta/ObterConsultasPendentesMedico/$medicoId',
+      '/med/Consulta/ObterConsultasPendentesMedico/$medicoId',
       method: 'GET',
     );
     return (response.data as List).isEmpty
@@ -55,7 +55,7 @@ class RestClient {
 
   Future<void> cancelarConsulta(String consultaId, String motivoCancelamento) async {
     await _request(
-      '/api/Consulta/Cancelar/$consultaId',
+      '/med/Consulta/Cancelar/$consultaId',
       method: 'PATCH',
       data: {
         'justificativaCancelamento': motivoCancelamento,
@@ -65,7 +65,7 @@ class RestClient {
 
   Future<void> agendarConsulta(AgendarConsultaInputModel consulta) async {
     await _request(
-      '/api/Consulta',
+      '/med/Consulta',
       method: 'POST',
       data: consulta.toJson(),
     );
@@ -73,7 +73,7 @@ class RestClient {
 
   Future<List<ConsultaViewModel>?> obterConsultasPaciente(String pacienteId) async {
     var response = await _request(
-      '/api/Consulta/ObterConsultasPaciente/$pacienteId',
+      '/med/Consulta/ObterConsultasPaciente/$pacienteId',
       method: 'GET',
     );
     return (response.data as List).isEmpty
@@ -85,7 +85,7 @@ class RestClient {
 
   Future<PacienteViewModel> obterPaciente(String pacienteId) async {
     var response = await _request(
-      '/api/Paciente/$pacienteId',
+      '/med/Paciente/$pacienteId',
       method: 'GET',
     );
     return PacienteViewModel.fromJson(response.data);
@@ -94,7 +94,7 @@ class RestClient {
   Future<void> atualizarPaciente(
       String pacienteId, AtualizacaoPacienteInputModel paciente) async {
     await _request(
-      '/api/Paciente/$pacienteId',
+      '/med/Paciente/$pacienteId',
       method: 'PATCH',
       data: paciente.toJson(),
     );
@@ -102,8 +102,16 @@ class RestClient {
 
   Future<void> excluirPaciente(String pacienteId) async {
     await _request(
-      '/api/Paciente/$pacienteId',
+      '/med/Paciente/$pacienteId',
       method: 'DELETE',
+    );
+  }
+
+  Future<void> cadastrarPaciente(CadastroPacienteInputModel paciente) async {
+    await _request(
+      '/med/Paciente',
+      method: 'POST',
+      data: paciente.toJson(),
     );
   }
 
