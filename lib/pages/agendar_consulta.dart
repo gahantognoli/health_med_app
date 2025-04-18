@@ -9,6 +9,7 @@ import 'package:health_med_app/api/models/disponibilidade_models.dart';
 import 'package:health_med_app/api/models/medico_models.dart';
 import 'package:health_med_app/api/rest_client.dart';
 import 'package:health_med_app/locator.dart';
+import 'package:health_med_app/services/auth_service.dart';
 import 'package:health_med_app/widgets/erro.dart';
 import 'package:health_med_app/widgets/selecionar_horario_dialog.dart';
 
@@ -26,6 +27,7 @@ class AgendarConsulta extends StatefulWidget {
 
 class _AgendarConsultaState extends State<AgendarConsulta> {
   final RestClient _restClient = getIt<RestClient>();
+  final AuthService _authService = getIt<AuthService>();
 
   MedicoViewModel? _medico;
   List<ConsultaViewModel>? _consultasOcupadas;
@@ -84,13 +86,12 @@ class _AgendarConsultaState extends State<AgendarConsulta> {
               .map((d) => d.diaSemana)
               .contains(data.weekday))
           .where((data) {
-            var disponibilidadeMedico = _medico!.disponibilidade!
-                .firstWhere((d) => d.diaSemana == data.weekday);
+        var disponibilidadeMedico = _medico!.disponibilidade!
+            .firstWhere((d) => d.diaSemana == data.weekday);
 
-            return data.hour >= disponibilidadeMedico.horaInicio &&
-                data.hour <= disponibilidadeMedico.horaFim;
-          })
-          .toList();
+        return data.hour >= disponibilidadeMedico.horaInicio &&
+            data.hour <= disponibilidadeMedico.horaFim;
+      }).toList();
     }
 
     if (_consultasOcupadas != null) {
@@ -162,8 +163,7 @@ class _AgendarConsultaState extends State<AgendarConsulta> {
     try {
       var consulta = AgendarConsultaInputModel(
         medicoId: _medico!.id,
-        pacienteId:
-            '34ca26eb-e3d1-4a31-b8a2-07f529154795', //todo: pegar do usuario logado
+        pacienteId: await _authService.obterIdUsuario() ?? '',
         horario: DateTime(
           dataSelecionada.year,
           dataSelecionada.month,

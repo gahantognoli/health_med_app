@@ -2,6 +2,7 @@ import 'package:dio/dio.dart';
 import 'package:health_med_app/api/exceptions/problem_details.dart';
 import 'package:health_med_app/api/models/consulta_models.dart';
 import 'package:health_med_app/api/models/especialidade_models.dart';
+import 'package:health_med_app/api/models/login_models.dart';
 import 'package:health_med_app/api/models/medico_models.dart';
 import 'package:health_med_app/api/models/paciente_models.dart';
 
@@ -41,7 +42,8 @@ class RestClient {
     return MedicoViewModel.fromJson(response.data);
   }
 
-  Future<List<ConsultaViewModel>?> obterConsultasPendentesMedico(String medicoId) async {
+  Future<List<ConsultaViewModel>?> obterConsultasPendentesMedico(
+      String medicoId) async {
     var response = await _request(
       '/med/Consulta/ObterConsultasPendentesMedico/$medicoId',
       method: 'GET',
@@ -53,7 +55,8 @@ class RestClient {
             .toList();
   }
 
-  Future<void> cancelarConsulta(String consultaId, String motivoCancelamento) async {
+  Future<void> cancelarConsulta(
+      String consultaId, String motivoCancelamento) async {
     await _request(
       '/med/Consulta/Cancelar/$consultaId',
       method: 'PATCH',
@@ -71,7 +74,8 @@ class RestClient {
     );
   }
 
-  Future<List<ConsultaViewModel>?> obterConsultasPaciente(String pacienteId) async {
+  Future<List<ConsultaViewModel>?> obterConsultasPaciente(
+      String pacienteId) async {
     var response = await _request(
       '/med/Consulta/ObterConsultasPaciente/$pacienteId',
       method: 'GET',
@@ -115,6 +119,21 @@ class RestClient {
     );
   }
 
+  Future<LoginResponse> login(LoginRequest login) async {
+    var response = await _request(
+      '/auth/login',
+      method: 'POST',
+      data: login.toJson(),
+    );
+
+    var apiResponse = ApiResponse<LoginResponse>.fromJsonWithData(
+      response.data,
+      (data) => LoginResponse.fromJson(data),
+    );
+
+    return apiResponse.data;
+  }
+
   Future<Response> _request(
     String path, {
     String method = 'GET',
@@ -123,7 +142,7 @@ class RestClient {
     Map<String, dynamic>? headers,
   }) async {
     try {
-      return await dio.request(
+      var response = await dio.request(
         path,
         options: Options(
           method: method,
@@ -132,6 +151,7 @@ class RestClient {
         queryParameters: queryParameters,
         data: data,
       );
+      return response;
     } on DioException catch (e) {
       if (e.response != null && e.response?.data is Map<String, dynamic>) {
         throw ProblemDetails.fromJson(e.response!.data);

@@ -5,6 +5,7 @@ import 'package:health_med_app/api/exceptions/problem_details.dart';
 import 'package:health_med_app/api/models/consulta_models.dart';
 import 'package:health_med_app/api/rest_client.dart';
 import 'package:health_med_app/locator.dart';
+import 'package:health_med_app/services/auth_service.dart';
 import 'package:health_med_app/widgets/cancelar_consulta_dialog.dart';
 import 'package:health_med_app/widgets/erro.dart';
 import 'package:intl/intl.dart';
@@ -18,6 +19,7 @@ class MinhasConsultas extends StatefulWidget {
 
 class _MinhasConsultasState extends State<MinhasConsultas> {
   final RestClient _restClient = getIt<RestClient>();
+  final AuthService _authService = getIt<AuthService>();
 
   List<ConsultaViewModel>? _consultas;
   bool _isLoading = true;
@@ -32,8 +34,7 @@ class _MinhasConsultasState extends State<MinhasConsultas> {
 
   Future<void> _carregarConsultas() async {
     try {
-      const String pacienteId =
-          '34ca26eb-e3d1-4a31-b8a2-07f529154795'; //todo: pegar do usuario logado
+      final String pacienteId = await _authService.obterIdUsuario() ?? ''; 
       final consultas = await _restClient.obterConsultasPaciente(pacienteId);
       setState(() {
         _hasError = false;

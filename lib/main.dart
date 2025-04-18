@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:health_med_app/locator.dart';
+import 'package:health_med_app/pages/login.dart';
 import 'package:health_med_app/services/config_service.dart';
 import 'package:health_med_app/pages/splash_screen.dart';
+
+final GlobalKey<NavigatorState> navigatorKey = GlobalKey<NavigatorState>();
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -27,6 +30,10 @@ class MyApp extends StatelessWidget {
         useMaterial3: true,
       ),
       home: const SplashScreen(),
+      navigatorKey: navigatorKey,
+      routes: {
+        '/login': (context) => const Login(),
+      },
     );
   }
 }

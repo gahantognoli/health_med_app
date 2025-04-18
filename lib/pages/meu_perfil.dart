@@ -5,6 +5,7 @@ import 'package:health_med_app/api/exceptions/problem_details.dart';
 import 'package:health_med_app/api/models/paciente_models.dart';
 import 'package:health_med_app/api/rest_client.dart';
 import 'package:health_med_app/locator.dart';
+import 'package:health_med_app/services/auth_service.dart';
 import 'package:health_med_app/widgets/erro.dart';
 
 class MeuPerfil extends StatefulWidget {
@@ -16,6 +17,7 @@ class MeuPerfil extends StatefulWidget {
 
 class _MeuPerfilState extends State<MeuPerfil> {
   final RestClient _restClient = getIt<RestClient>();
+  final AuthService _authService = getIt<AuthService>();
 
   bool _isLoading = true;
   bool _hasError = false;
@@ -30,8 +32,7 @@ class _MeuPerfilState extends State<MeuPerfil> {
 
   Future<void> _carregarDados() async {
     try {
-      const String pacienteId =
-          '34ca26eb-e3d1-4a31-b8a2-07f529154795'; //todo: pegar do usuario logado
+      final String pacienteId = await _authService.obterIdUsuario() ?? '';
       var paciente = await _restClient.obterPaciente(pacienteId);
       setState(() {
         _paciente = paciente;
@@ -49,8 +50,7 @@ class _MeuPerfilState extends State<MeuPerfil> {
 
   Future<void> atualizarDados() async {
     try {
-      const String pacienteId =
-          '34ca26eb-e3d1-4a31-b8a2-07f529154795'; //todo: pegar do usuario logado
+      final String pacienteId = await _authService.obterIdUsuario() ?? '';
 
       var pacienteInputModel = AtualizacaoPacienteInputModel(
         nome: _nomeController.text,
@@ -83,8 +83,7 @@ class _MeuPerfilState extends State<MeuPerfil> {
 
   Future<void> excluirConta() async {
     try {
-      const String pacienteId =
-          '34ca26eb-e3d1-4a31-b8a2-07f529154795'; //todo: pegar do usuario logado
+      final String pacienteId = await _authService.obterIdUsuario() ?? '';
       await _restClient.excluirPaciente(pacienteId);
       Navigator.of(context).pop();
       ScaffoldMessenger.of(context).showSnackBar(
@@ -93,7 +92,7 @@ class _MeuPerfilState extends State<MeuPerfil> {
           duration: Duration(seconds: 2),
         ),
       );
-      //todo: redirecionar para tela de login
+      Navigator.of(context).pushReplacementNamed('/login');
     } catch (e) {
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(
@@ -193,6 +192,21 @@ class _MeuPerfilState extends State<MeuPerfil> {
                     foregroundColor: Colors.white,
                   ),
                   child: const Text('Excluir conta'),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 20),
+          Row(
+            children: [
+              Expanded(
+                child: ElevatedButton(
+                  onPressed: () => _authService.logout(),
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: Theme.of(context).colorScheme.secondary,
+                    foregroundColor: Theme.of(context).colorScheme.tertiary,
+                  ),
+                  child: const Text('Sair'),
                 ),
               ),
             ],
